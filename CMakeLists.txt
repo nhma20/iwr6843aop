@@ -11,7 +11,7 @@ endif()
 
 
 include(FetchContent)
-FetchContent_Declare(serial GIT_REPOSITORY git@github.com:kria-system/serial.git
+FetchContent_Declare(serial GIT_REPOSITORY https://github.com/kria-system/serial.git
    			GIT_TAG a1193a9b3b03389f7b79c9bdb6192c9d986fa87c
    			GIT_PROGRESS TRUE)
 FetchContent_GetProperties(serial)
