@@ -19,18 +19,24 @@ class IWR6843_publisher : public rclcpp::Node {
 public:
 	IWR6843_publisher() : Node("IWR6843_publisher") {
 
-    while (!iwr6843aop_.init())
+    this->declare_parameter("cfg_path");
+    cfg_path_ = this->get_parameter("cfg_path");
+    cfg_path_str_ = cfg_path_.as_string();
+    //str_param.value_to_string().c_str(),
+    
+    if (!iwr6843aop_.init())
     {
         RCLCPP_FATAL(this->get_logger(), "Could not initialize IWR6843AOP device");
         std::this_thread::sleep_for(std::chrono::milliseconds(500));
+        rclcpp::shutdown();
     }
 
-    iwr6843aop_.configure("/home/nm/px4_ros_com_ros2/install/iwr6843aop/lib/iwr6843aop/30deg_Group_18m_30Hz.cfg");
+    iwr6843aop_.configure(cfg_path_str_);
     iwr6843aop_.start();
 
     pcl_pub_ = this->create_publisher<sensor_msgs::msg::PointCloud2>("/iwr6843_pcl", 10);
 
-    timer_ = this->create_wall_timer(std::chrono::milliseconds(30), std::bind(&IWR6843_publisher::timer_callback, this));
+    timer_ = this->create_wall_timer(std::chrono::milliseconds(33), std::bind(&IWR6843_publisher::timer_callback, this));
 
   }
 
@@ -44,6 +50,9 @@ public:
     rclcpp::TimerBase::SharedPtr timer_;
     iwr6843::Iwr6843aop iwr6843aop_;
     std::vector<radar::RadarPointCartesian> radarData_;
+    rclcpp::Parameter cfg_path_;
+    std::string cfg_path_str_;
+
 
     rclcpp::Publisher<sensor_msgs::msg::PointCloud2>::SharedPtr pcl_pub_;
 
@@ -94,11 +103,12 @@ void IWR6843_publisher::timer_callback() {
 
       pcl2_msg.data.resize(std::max((size_t)1, radarData_.size()) * POINT_STEP, 0x00);
 
-  } //else {
+  } 
+  else {
 
-  //     return;
+      return; // do not publish empty pointcloud
 
-  // }
+  }
 
   pcl2_msg.point_step = POINT_STEP; // size (bytes) of 1 point (float32 * dimensions (3 when xyz))
   pcl2_msg.row_step = pcl2_msg.data.size();//pcl2_msg.point_step * pcl2_msg.width; // only 1 row because unordered
