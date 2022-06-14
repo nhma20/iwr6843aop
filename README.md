@@ -10,7 +10,7 @@ colcon build --packages-select iwr6843aop
 
 Run:
 ```
-ros2 run iwr6843aop iwr6843aop_test --ros-args -p cfg_path:=/home/nm/px4_ros_com_ros2/src/iwr6843aop/cfg_files/30deg_Group_18m_30Hz.cfg
+ros2 run iwr6843aop iwr6843aop_test --ros-args -p cfg_path:=<path/to/config.cfg>
 ```
 
 TODO:
